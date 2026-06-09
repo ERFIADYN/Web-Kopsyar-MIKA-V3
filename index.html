@@ -1,0 +1,2163 @@
+<!doctype html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      --bg: #f5f7f8;
+      --surface: #ffffff;
+      --surface-2: #edf6f3;
+      --line: #d8e0e5;
+      --line-strong: #b9c8d0;
+      --text: #1f2933;
+      --muted: #657381;
+      --brand: #0f766e;
+      --brand-dark: #0b5f59;
+      --blue: #2563eb;
+      --amber: #b45309;
+      --red: #b91c1c;
+      --green: #15803d;
+      --shadow: 0 18px 48px rgba(31, 41, 51, 0.12);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 18px 14px;
+      background: #ffffff;
+      border-right: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 54px;
+      padding: 8px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border: 1px solid #b7ddd3;
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      color: var(--brand);
+      font-weight: 800;
+      overflow: hidden;
+    }
+
+    .brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .brand p {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .menu {
+      display: grid;
+      gap: 6px;
+    }
+
+    .menu button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: #344252;
+      text-align: left;
+    }
+
+    .menu button:hover {
+      background: #f0f4f5;
+      border-color: var(--line);
+    }
+
+    .menu button.active {
+      background: var(--surface-2);
+      border-color: #a8d4ca;
+      color: var(--brand-dark);
+      font-weight: 700;
+    }
+
+    .menu svg,
+    .icon-button svg,
+    .btn svg {
+      width: 17px;
+      height: 17px;
+      flex: 0 0 auto;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fafbfb;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .workspace {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 78px;
+      padding: 16px 26px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(245, 247, 248, 0.92);
+      backdrop-filter: blur(12px);
+    }
+
+    .topbar p {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    .content {
+      width: 100%;
+      max-width: 1480px;
+      padding: 22px 26px 40px;
+    }
+
+    .toolbar,
+    .period-bar,
+    .table-toolbar {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .period-bar {
+      align-items: center;
+      justify-content: flex-start;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      padding: 6px;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .tabs button {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 36px;
+      padding: 7px 10px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .tabs button.active {
+      border-color: #a8d4ca;
+      background: var(--surface-2);
+      color: var(--brand-dark);
+    }
+
+    .tabs svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .check-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .check-item {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--green);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .check-item.warn {
+      border-left-color: var(--amber);
+      background: #fffbeb;
+    }
+
+    .check-item strong,
+    .check-item span {
+      display: block;
+    }
+
+    .check-item span {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .period-bar label,
+    .field label,
+    .inline-field {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 39px;
+      padding: 8px 10px;
+      border: 1px solid var(--line-strong);
+      border-radius: 7px;
+      background: #ffffff;
+      color: var(--text);
+      outline: none;
+    }
+
+    textarea {
+      min-height: 78px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+    }
+
+    .btn,
+    .icon-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 39px;
+      padding: 8px 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: 7px;
+      background: #ffffff;
+      color: var(--text);
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .icon-button {
+      width: 38px;
+      padding: 8px;
+    }
+
+    .btn:hover,
+    .icon-button:hover {
+      border-color: #8ea1ad;
+      background: #f7faf9;
+    }
+
+    .btn.primary {
+      border-color: var(--brand);
+      background: var(--brand);
+      color: #ffffff;
+    }
+
+    .btn.primary:hover {
+      background: var(--brand-dark);
+    }
+
+    .btn.blue {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #ffffff;
+    }
+
+    .btn.danger {
+      border-color: #f4c7c7;
+      background: #fff5f5;
+      color: var(--red);
+    }
+
+    .btn.ghost {
+      background: transparent;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .metrics-grid {
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+    }
+
+    .two-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .three-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .panel,
+    .metric-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .metric-card {
+      min-height: 112px;
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .metric-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .metric-card strong {
+      font-size: clamp(18px, 2vw, 26px);
+      line-height: 1.15;
+      word-break: break-word;
+    }
+
+    .metric-card small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .tone-green {
+      color: var(--green);
+    }
+
+    .tone-blue {
+      color: var(--blue);
+    }
+
+    .tone-amber {
+      color: var(--amber);
+    }
+
+    .tone-red {
+      color: var(--red);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 58px;
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-header h3 {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .panel-header p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .panel-body {
+      padding: 14px;
+    }
+
+    .chart-box {
+      position: relative;
+      width: 100%;
+      height: 320px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .form-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .form-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .info-strip,
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .info-item,
+    .summary-item {
+      min-height: 70px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfcfc;
+    }
+
+    .info-item span,
+    .summary-item span {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .info-item strong,
+    .summary-item strong {
+      font-size: 18px;
+      word-break: break-word;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      background: #f7faf9;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    td.numeric,
+    th.numeric {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .table-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .pill.green {
+      background: #e8f7ee;
+      color: var(--green);
+    }
+
+    .pill.red {
+      background: #fff1f1;
+      color: var(--red);
+    }
+
+    .pill.blue {
+      background: #eef4ff;
+      color: var(--blue);
+    }
+
+    .pill.amber {
+      background: #fff7ed;
+      color: var(--amber);
+    }
+
+    .empty-cell,
+    .empty-state {
+      color: var(--muted);
+      text-align: center;
+      padding: 28px 14px;
+    }
+
+    .calculator-result {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .calculator-result div {
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfcfc;
+    }
+
+    .calculator-result span {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .calculator-result strong {
+      font-size: 15px;
+      word-break: break-word;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(31, 41, 51, 0.45);
+    }
+
+    .modal {
+      width: min(760px, 100%);
+      max-height: calc(100vh - 36px);
+      display: flex;
+      flex-direction: column;
+      border-radius: var(--radius);
+      background: #ffffff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .modal-header,
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .modal-body {
+      padding: 16px;
+      overflow: auto;
+    }
+
+    .modal-footer {
+      justify-content: flex-end;
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 80;
+      max-width: min(420px, calc(100vw - 40px));
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      background: #1f2933;
+      color: #ffffff;
+      box-shadow: var(--shadow);
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.18s ease;
+      font-size: 13px;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .loading {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: grid;
+      place-items: center;
+      background: rgba(245, 247, 248, 0.55);
+    }
+
+    .loader {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+      box-shadow: var(--shadow);
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 3px solid #d7e6e2;
+      border-top-color: var(--brand);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .print-title {
+      display: none;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 1180px) {
+      .metrics-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .two-grid,
+      .three-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .menu {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .sidebar-footer {
+        display: none;
+      }
+
+      .topbar {
+        position: static;
+        padding: 14px 16px;
+      }
+
+      .content {
+        padding: 16px;
+      }
+
+      .metrics-grid,
+      .info-strip,
+      .summary-strip,
+      .check-strip,
+      .calculator-result,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      @page {
+        margin: 14mm;
+      }
+
+      body {
+        background: #ffffff;
+      }
+
+      .sidebar,
+      .topbar,
+      .no-print,
+      .modal-backdrop,
+      .toast,
+      .loading {
+        display: none !important;
+      }
+
+      .app-shell {
+        display: block;
+      }
+
+      .content {
+        max-width: none;
+        padding: 0;
+      }
+
+      .panel {
+        border: 0;
+        break-inside: avoid;
+      }
+
+      .panel-header {
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .panel-body {
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .print-title {
+        display: block;
+        margin-bottom: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark" id="brandMark">KSP</div>
+        <div>
+          <h1 id="brandName">Koperasi Simpan Pinjam</h1>
+          <p id="brandAddress">Google Sheet Database</p>
+        </div>
+      </div>
+      <nav class="menu" id="menu"></nav>
+      <div class="sidebar-footer">
+        <strong id="sidebarSummary">Database siap.</strong>
+        <div id="sidebarDetails">Transaksi tersimpan otomatis ke Google Sheet.</div>
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <header class="topbar">
+        <div>
+          <p id="pageMeta">Memuat data</p>
+          <h2 id="pageTitle">Dashboard</h2>
+        </div>
+        <div id="topActions" class="no-print"></div>
+      </header>
+      <main class="content" id="content"></main>
+    </section>
+  </div>
+
+  <div id="modalRoot"></div>
+  <div class="toast" id="toast"></div>
+  <div class="loading hidden" id="loading">
+    <div class="loader"><span class="spinner"></span><span>Memproses</span></div>
+  </div>
+
+  <script>
+    var MENU = [
+      { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
+      { id: 'anggota', label: 'Data Anggota', icon: 'users' },
+      { id: 'simpanan', label: 'Simpanan', icon: 'wallet-cards' },
+      { id: 'pinjaman', label: 'Pinjaman', icon: 'hand-coins' },
+      { id: 'laporan', label: 'Akuntansi & Laporan', icon: 'book-open-check' },
+      { id: 'pengaturan', label: 'Pengaturan', icon: 'settings' }
+    ];
+
+    var state = {
+      active: 'dashboard',
+      data: null,
+      busy: false,
+      memberSearch: '',
+      memberStatus: 'Semua',
+      accountingTab: 'ringkasan',
+      period: {
+        mode: 'last6',
+        year: new Date().getFullYear(),
+        month: new Date().getMonth() + 1,
+        startDate: '',
+        endDate: ''
+      },
+      charts: {}
+    };
+
+    document.addEventListener('DOMContentLoaded', boot);
+
+    function boot() {
+      renderMenu();
+      if (!window.google || !google.script || !google.script.run) {
+        state.data = demoData();
+        render();
+        showToast('Mode pratinjau lokal. Deploy ke Google Apps Script untuk menyimpan data.');
+        return;
+      }
+      loadData();
+    }
+
+    function demoData() {
+      var coa = [
+        ['1112', 'Bank Operasional', 'ASET', 'DEBET', 'NERACA', 'Kas dan Setara Kas'],
+        ['1122', 'Piutang Murabahah', 'ASET', 'DEBET', 'NERACA', 'Piutang Pembiayaan'],
+        ['1129', 'Margin Murabahah Tangguhan', 'ASET', 'KREDIT', 'NERACA', 'Kontra Piutang'],
+        ['2211', 'Simpanan Sukarela Anggota', 'KEWAJIBAN', 'KREDIT', 'NERACA', 'Dana Anggota'],
+        ['3111', 'Simpanan Pokok', 'EKUITAS', 'KREDIT', 'NERACA', 'Modal Anggota'],
+        ['3112', 'Simpanan Wajib', 'EKUITAS', 'KREDIT', 'NERACA', 'Modal Anggota'],
+        ['4111', 'Pendapatan Margin Murabahah', 'PENDAPATAN', 'KREDIT', 'LABA RUGI', 'Pendapatan Pembiayaan'],
+        ['5111', 'Beban Administrasi Bank', 'BEBAN', 'DEBET', 'LABA RUGI', 'Beban Administrasi']
+      ].map(function (r) { return { kodeAkun: r[0], namaAkun: r[1], kategori: r[2], normal: r[3], laporan: r[4], grup: r[5], aktif: true, keterangan: '' }; });
+      var journal = [
+        { tanggal: '2026-01-05', noBukti: 'BKM-001', sumber: 'Simpanan', refId: 'SM-001', kodeAkun: '1112', namaAkun: 'Bank Operasional', debet: 10000000, kredit: 0, memo: 'Setoran modal anggota' },
+        { tanggal: '2026-01-05', noBukti: 'BKM-001', sumber: 'Simpanan', refId: 'SM-001', kodeAkun: '3112', namaAkun: 'Simpanan Wajib', debet: 0, kredit: 10000000, memo: 'Setoran modal anggota' },
+        { tanggal: '2026-02-01', noBukti: 'PPD-001', sumber: 'Pembiayaan', refId: 'PNJ-001', kodeAkun: '1122', namaAkun: 'Piutang Murabahah', debet: 6000000, kredit: 0, memo: 'Pembiayaan anggota' },
+        { tanggal: '2026-02-01', noBukti: 'PPD-001', sumber: 'Pembiayaan', refId: 'PNJ-001', kodeAkun: '1112', namaAkun: 'Bank Operasional', debet: 0, kredit: 5000000, memo: 'Pencairan pembiayaan' },
+        { tanggal: '2026-02-01', noBukti: 'PPD-001', sumber: 'Pembiayaan', refId: 'PNJ-001', kodeAkun: '1129', namaAkun: 'Margin Murabahah Tangguhan', debet: 0, kredit: 1000000, memo: 'Margin tangguhan' },
+        { tanggal: '2026-03-01', noBukti: 'ANG-001', sumber: 'Angsuran', refId: 'ANG-001', kodeAkun: '1112', namaAkun: 'Bank Operasional', debet: 600000, kredit: 0, memo: 'Angsuran pertama' },
+        { tanggal: '2026-03-01', noBukti: 'ANG-001', sumber: 'Angsuran', refId: 'ANG-001', kodeAkun: '1122', namaAkun: 'Piutang Murabahah', debet: 0, kredit: 600000, memo: 'Angsuran pertama' },
+        { tanggal: '2026-03-01', noBukti: 'ANG-001', sumber: 'Angsuran', refId: 'ANG-001', kodeAkun: '1129', namaAkun: 'Margin Murabahah Tangguhan', debet: 100000, kredit: 0, memo: 'Pengakuan margin' },
+        { tanggal: '2026-03-01', noBukti: 'ANG-001', sumber: 'Angsuran', refId: 'ANG-001', kodeAkun: '4111', namaAkun: 'Pendapatan Margin Murabahah', debet: 0, kredit: 100000, memo: 'Pengakuan margin' },
+        { tanggal: '2026-03-31', noBukti: 'BKK-001', sumber: 'Transaksi Keuangan', refId: 'TRX-001', kodeAkun: '5111', namaAkun: 'Beban Administrasi Bank', debet: 25000, kredit: 0, memo: 'Biaya bank' },
+        { tanggal: '2026-03-31', noBukti: 'BKK-001', sumber: 'Transaksi Keuangan', refId: 'TRX-001', kodeAkun: '1112', namaAkun: 'Bank Operasional', debet: 0, kredit: 25000, memo: 'Biaya bank' }
+      ];
+      var tbRows = coa.map(function (a) {
+        var lines = journal.filter(function (j) { return j.kodeAkun === a.kodeAkun; });
+        var d = lines.reduce(function (s, j) { return s + j.debet; }, 0);
+        var k = lines.reduce(function (s, j) { return s + j.kredit; }, 0);
+        return { kodeAkun: a.kodeAkun, namaAkun: a.namaAkun, saldoAwalDebet: 0, saldoAwalKredit: 0, mutasiDebet: d, mutasiKredit: k, saldoAkhirDebet: Math.max(d - k, 0), saldoAkhirKredit: Math.max(k - d, 0) };
+      }).filter(function (r) { return r.mutasiDebet || r.mutasiKredit; });
+      var loan = { tanggal: '2026-02-01', idPinjaman: 'PNJ-001', idAnggota: 'AGG-001', nama: 'Arief Wicaksono', akad: 'Murabahah', program: 'MIKA General Financing', tujuan: 'Pembayaran UKT', pokok: 5000000, totalBunga: 1000000, totalTagihan: 6000000, angsuranBulanan: 600000, totalDibayar: 600000, sisaPinjaman: 5400000, status: 'Aktif' };
+      var cashRows = [
+        { tanggal: '2026-01-05', sumber: 'Simpanan', refId: 'SM-001', nama: 'Anggota', masuk: 10000000, keluar: 0, saldo: 10000000, keterangan: 'Setoran simpanan wajib' },
+        { tanggal: '2026-02-01', sumber: 'Pencairan Pinjaman', refId: 'PNJ-001', nama: 'Arief Wicaksono', masuk: 0, keluar: 5000000, saldo: 5000000, keterangan: 'Pencairan murabahah' },
+        { tanggal: '2026-03-01', sumber: 'Angsuran Pinjaman', refId: 'ANG-001', nama: 'Arief Wicaksono', masuk: 600000, keluar: 0, saldo: 5600000, keterangan: 'Angsuran pertama' },
+        { tanggal: '2026-03-31', sumber: 'Transaksi Keuangan', refId: 'TRX-001', nama: 'Bank', masuk: 0, keluar: 25000, saldo: 5575000, keterangan: 'Biaya administrasi bank' }
+      ];
+      var accounting = {
+        period: { label: 'Tahun 2026' }, coa: coa, accounts: coa,
+        bankAccounts: [{ namaRekening: 'Bank Operasional', bank: 'BSI', nomorRekening: '•••• 2026', kodeAkun: '1112', saldoAwal: 0 }],
+        transactions: [{ tanggal: '2026-03-31', noBukti: 'BKK-001', jenis: 'Keluar', kodeRekening: '1112', kodeLawanAkun: '5111', nominal: 25000, pihak: 'Bank', keterangan: 'Biaya administrasi bank' }],
+        cash: { saldoAwal: 0, totalMasuk: 10600000, totalKeluar: 5025000, saldoAkhir: 5575000, rows: cashRows },
+        journal: journal,
+        trialBalance: { rows: tbRows, totalSaldoAwalDebet: 0, totalSaldoAwalKredit: 0, totalMutasiDebet: 16725000, totalMutasiKredit: 16725000, totalSaldoAkhirDebet: 11075000, totalSaldoAkhirKredit: 11075000 },
+        neraca: { aset: [{ grup: 'Kas dan Setara Kas', akun: 'Bank Operasional', nominal: 5575000 }, { grup: 'Piutang Pembiayaan', akun: 'Piutang Murabahah', nominal: 5400000 }, { grup: 'Kontra Piutang', akun: 'Margin Murabahah Tangguhan', nominal: -900000 }], kewajiban: [], ekuitas: [{ grup: 'Modal Anggota', akun: 'Simpanan Wajib', nominal: 10000000 }, { grup: 'Hasil Usaha', akun: 'SHU Tahun Berjalan', nominal: 75000 }], totalAset: 10075000, totalKewajiban: 0, totalEkuitas: 10075000, totalKewajibanEkuitas: 10075000 },
+        labaRugi: { pendapatan: [{ grup: 'Pendapatan Pembiayaan', akun: 'Pendapatan Margin Murabahah', nominal: 100000 }], beban: [{ grup: 'Beban Administrasi', akun: 'Beban Administrasi Bank', nominal: 25000 }], totalPendapatan: 100000, totalBeban: 25000, shuBersih: 75000 },
+        shu: { shu: 75000, totalPersentase: 100, rows: [['Dana Cadangan', 30], ['Jasa Simpanan Anggota', 30], ['Partisipasi Anggota', 20], ['Bonus Pengelola', 15], ['Dana Sosial', 5]].map(function (r) { return { pos: r[0], persentase: r[1], jumlah: 75000 * r[1] / 100 }; }) },
+        loans: [loan], fixedAssets: [{ tanggalPerolehan: '2026-01-10', namaAset: 'Laptop Administrasi', kategori: 'Inventaris', nilaiPerolehan: 8000000, akumulasiPenyusutan: 500000, nilaiBuku: 7500000, status: 'Aktif' }],
+        benevolentFunds: [{ tanggal: '2026-03-05', jenis: 'Sumber', sumberPenggunaan: 'Denda keterlambatan', nominal: 50000, noBukti: 'DKB-001', keterangan: 'Dana sosial' }],
+        administration: [{ jenisDokumen: 'RAT', nomor: 'RAT/2026/01', tanggal: '2026-02-20', berlakuSampai: '', penanggungJawab: 'Pengurus', status: 'Aktif', linkDokumen: '', keterangan: '' }],
+        checks: { journalDifference: 0, balanceDifference: 0, unclassifiedCount: 0 }
+      };
+      return {
+        settings: { namaKoperasi: 'Koperasi Syariah MIKA Airlangga', alamatKoperasi: 'Universitas Airlangga', logoUrl: '', bungaPinjaman: 1.5, biayaAdmin: 0, rekeningUtama: '1112', persenCadangan: 30, persenJasaSimpanan: 30, persenPartisipasi: 20, persenPengelola: 15, persenSosial: 5 },
+        dashboard: { period: { label: 'Tahun 2026' }, metrics: { totalKas: 5575000, totalSimpanan: 10000000, sisaPinjaman: 5400000, totalAnggota: 24, dosen: 18, mahasiswa: 6, asetBersihAnggota: 4600000, kasMasukPeriode: 10600000, kasKeluarPeriode: 5025000 }, cashFlow: { labels: ['Jan', 'Feb', 'Mar'], masuk: [10000000, 0, 600000], keluar: [0, 5000000, 25000] }, savingsComposition: { labels: ['Pokok', 'Wajib', 'Sukarela'], values: [2500000, 6500000, 1000000] }, recentCash: cashRows },
+        members: [], savings: [], loans: [loan], installments: [], reports: {}, accounting: accounting
+      };
+    }
+
+    async function loadData() {
+      setBusy(true);
+      try {
+        state.data = await api('getAppData', state.period);
+        render();
+      } catch (error) {
+        showToast(errorMessage(error));
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function api(fn) {
+      var args = Array.prototype.slice.call(arguments, 1);
+      return new Promise(function (resolve, reject) {
+        var runner = google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(reject);
+        runner[fn].apply(runner, args);
+      });
+    }
+
+    function render() {
+      if (!state.data) return;
+      renderBrand();
+      renderMenu();
+
+      var current = MENU.find(function (item) { return item.id === state.active; }) || MENU[0];
+      document.getElementById('pageTitle').textContent = current.label;
+      document.getElementById('pageMeta').textContent = state.data.settings.namaKoperasi || 'Koperasi Simpan Pinjam';
+      document.getElementById('topActions').innerHTML = '<button class="icon-button" onclick="loadData()" title="Muat ulang"><i data-lucide="refresh-cw"></i></button>';
+
+      if (state.active === 'dashboard') renderDashboard();
+      if (state.active === 'anggota') renderMembers();
+      if (state.active === 'simpanan') renderSavings();
+      if (state.active === 'pinjaman') renderLoans();
+      if (state.active === 'laporan') renderReports();
+      if (state.active === 'pengaturan') renderSettings();
+
+      activateIcons();
+    }
+
+    function renderBrand() {
+      var settings = state.data.settings || {};
+      document.getElementById('brandName').textContent = settings.namaKoperasi || 'Koperasi Simpan Pinjam';
+      document.getElementById('brandAddress').textContent = settings.alamatKoperasi || 'Google Sheet Database';
+      document.getElementById('brandMark').innerHTML = settings.logoUrl
+        ? '<img src="' + escapeHtml(settings.logoUrl) + '" alt="Logo">'
+        : 'KSP';
+      var metrics = state.data.dashboard.metrics;
+      document.getElementById('sidebarSummary').textContent = 'Kas ' + rupiah(metrics.totalKas);
+      document.getElementById('sidebarDetails').textContent = metrics.totalAnggota + ' anggota aktif';
+    }
+
+    function renderMenu() {
+      document.getElementById('menu').innerHTML = MENU.map(function (item) {
+        return '<button class="' + (state.active === item.id ? 'active' : '') + '" onclick="setPage(\'' + item.id + '\')">'
+          + '<i data-lucide="' + item.icon + '"></i><span>' + item.label + '</span></button>';
+      }).join('');
+      activateIcons();
+    }
+
+    function setPage(page) {
+      state.active = page;
+      render();
+    }
+
+    function renderDashboard() {
+      var data = state.data.dashboard;
+      var m = data.metrics;
+      document.getElementById('content').innerHTML =
+        '<div class="print-title"><h2>Dashboard</h2><p>' + escapeHtml(data.period.label) + '</p></div>'
+        + periodControls()
+        + '<section class="grid metrics-grid">'
+        + metricCard('Total Kas', rupiah(m.totalKas), 'banknote', 'tone-green', 'Masuk ' + rupiah(m.kasMasukPeriode) + ' | Keluar ' + rupiah(m.kasKeluarPeriode))
+        + metricCard('Total Simpanan', rupiah(m.totalSimpanan), 'piggy-bank', 'tone-blue', 'Aset bersih ' + rupiah(m.asetBersihAnggota))
+        + metricCard('Sisa Pinjaman', rupiah(m.sisaPinjaman), 'receipt-text', 'tone-amber', 'Piutang berjalan')
+        + metricCard('Total Anggota', number(m.totalAnggota), 'users', 'tone-green', 'Aktif')
+        + metricCard('Kategori', number(m.dosen) + ' Dosen / ' + number(m.mahasiswa) + ' Mahasiswa', 'graduation-cap', 'tone-blue', 'Anggota aktif')
+        + '</section>'
+        + '<section class="grid two-grid" style="margin-top:14px;">'
+        + panel('Arus Kas', data.period.label, '<div class="chart-box"><canvas id="cashChart"></canvas></div>')
+        + panel('Komposisi Simpanan', 'Saldo berjalan', '<div class="chart-box"><canvas id="savingChart"></canvas></div>')
+        + '</section>'
+        + '<section style="margin-top:14px;">'
+        + panel('Mutasi Kas Terbaru', data.period.label, cashTable(data.recentCash, 8))
+        + '</section>';
+      setTimeout(drawDashboardCharts, 0);
+    }
+
+    function drawDashboardCharts() {
+      var data = state.data.dashboard;
+      destroyChart('cashChart');
+      destroyChart('savingChart');
+      if (!window.Chart) return;
+
+      state.charts.cashChart = new Chart(document.getElementById('cashChart'), {
+        type: 'bar',
+        data: {
+          labels: data.cashFlow.labels,
+          datasets: [
+            { label: 'Kas Masuk', data: data.cashFlow.masuk, backgroundColor: '#0f766e', borderRadius: 6 },
+            { label: 'Kas Keluar', data: data.cashFlow.keluar, backgroundColor: '#b45309', borderRadius: 6 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } },
+          scales: { y: { ticks: { callback: shortRupiah } } }
+        }
+      });
+
+      state.charts.savingChart = new Chart(document.getElementById('savingChart'), {
+        type: 'doughnut',
+        data: {
+          labels: data.savingsComposition.labels,
+          datasets: [{
+            data: data.savingsComposition.values,
+            backgroundColor: ['#2563eb', '#0f766e', '#b45309'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '62%',
+          plugins: {
+            legend: { position: 'bottom' },
+            tooltip: { callbacks: { label: function (ctx) { return ctx.label + ': ' + rupiah(ctx.raw); } } }
+          }
+        }
+      });
+    }
+
+    function destroyChart(key) {
+      if (state.charts[key]) {
+        state.charts[key].destroy();
+        state.charts[key] = null;
+      }
+    }
+
+    function renderMembers() {
+      document.getElementById('content').innerHTML =
+        '<div class="toolbar no-print">'
+        + '<div class="table-toolbar" style="margin-bottom:0;">'
+        + '<label class="inline-field">Pencarian<input id="memberSearch" value="' + escapeHtml(state.memberSearch) + '" oninput="state.memberSearch=this.value; renderMemberRows()" placeholder="Nama atau ID"></label>'
+        + '<label class="inline-field">Status<select id="memberStatus" onchange="state.memberStatus=this.value; renderMemberRows()">'
+        + option('Semua', state.memberStatus) + option('Aktif', state.memberStatus) + option('Nonaktif', state.memberStatus)
+        + '</select></label>'
+        + '</div>'
+        + '<button class="btn primary" onclick="openMemberForm()"><i data-lucide="user-plus"></i>Tambah</button>'
+        + '</div>'
+        + panel('Database Anggota', 'Saldo dihitung dari transaksi simpanan dan pinjaman', '<div class="table-wrap"><table><thead><tr>'
+        + '<th>ID</th><th>Nama</th><th>Kategori</th><th>Status</th><th class="numeric">Simpanan</th><th class="numeric">Sisa Pinjaman</th><th class="numeric">Aset Bersih</th><th class="numeric no-print">Aksi</th>'
+        + '</tr></thead><tbody id="memberRows"></tbody></table></div>');
+      renderMemberRows();
+    }
+
+    function renderMemberRows() {
+      var tbody = document.getElementById('memberRows');
+      if (!tbody || !state.data) return;
+      var text = (state.memberSearch || '').toLowerCase();
+      var rows = state.data.members.filter(function (member) {
+        var matchText = [member.idAnggota, member.nama, member.status].join(' ').toLowerCase().indexOf(text) > -1;
+        var matchStatus = state.memberStatus === 'Semua' || member.status === state.memberStatus;
+        return matchText && matchStatus;
+      });
+      tbody.innerHTML = rows.length ? rows.map(function (member) {
+        return '<tr>'
+          + '<td><strong>' + escapeHtml(member.idAnggota) + '</strong></td>'
+          + '<td>' + escapeHtml(member.nama) + '<br><small>' + escapeHtml(member.identitas || member.telepon || '') + '</small></td>'
+          + '<td>' + escapeHtml(member.kategori) + '</td>'
+          + '<td>' + statusPill(member.status) + '</td>'
+          + '<td class="numeric">' + rupiah(member.totalSimpanan) + '</td>'
+          + '<td class="numeric">' + rupiah(member.sisaPinjaman) + '</td>'
+          + '<td class="numeric">' + rupiah(member.asetBersih) + '</td>'
+          + '<td class="numeric no-print"><div class="table-actions">'
+          + '<button class="icon-button" onclick="openMemberForm(\'' + member.idAnggota + '\')" title="Edit"><i data-lucide="pencil"></i></button>'
+          + '<button class="icon-button" onclick="processExit(\'' + member.idAnggota + '\')" title="Proses keluar" ' + (member.status !== 'Aktif' ? 'disabled' : '') + '><i data-lucide="log-out"></i></button>'
+          + '</div></td></tr>';
+      }).join('') : emptyRow(8, 'Belum ada anggota.');
+      activateIcons();
+    }
+
+    function openMemberForm(id) {
+      var member = id ? findMember(id) : {};
+      var title = id ? 'Edit Anggota' : 'Tambah Anggota';
+      var body =
+        '<form id="memberForm" class="form-grid" onsubmit="submitMember(event)">'
+        + '<input type="hidden" name="idAnggota" value="' + escapeHtml(member.idAnggota || '') + '">'
+        + field('Nama', '<input name="nama" required value="' + escapeHtml(member.nama || '') + '">')
+        + field('Kategori', '<select name="kategori">' + option('Mahasiswa', member.kategori) + option('Dosen', member.kategori) + '</select>')
+        + field('ID / NIM / NIDN', '<input name="identitas" value="' + escapeHtml(member.identitas || '') + '">')
+        + field('Email', '<input type="email" name="email" value="' + escapeHtml(member.email || '') + '">')
+        + field('Telepon', '<input name="telepon" value="' + escapeHtml(member.telepon || '') + '">')
+        + field('Tanggal Bergabung', '<input type="date" name="tanggalBergabung" value="' + escapeHtml(member.tanggalBergabung || todayInput()) + '">')
+        + field('Status', '<select name="status">' + option('Aktif', member.status) + option('Nonaktif', member.status) + '</select>')
+        + field('Alamat', '<textarea name="alamat">' + escapeHtml(member.alamat || '') + '</textarea>', 'full')
+        + field('Catatan', '<textarea name="catatan">' + escapeHtml(member.catatan || '') + '</textarea>', 'full')
+        + '</form>';
+      openModal(title, body, '<button class="btn" onclick="closeModal()">Batal</button><button class="btn primary" form="memberForm" type="submit"><i data-lucide="save"></i>Simpan</button>');
+    }
+
+    async function submitMember(event) {
+      event.preventDefault();
+      setBusy(true);
+      try {
+        await api('saveMember', formPayload(event.target));
+        closeModal();
+        await loadData();
+        showToast('Data anggota tersimpan.');
+      } catch (error) {
+        showToast(errorMessage(error));
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function processExit(id) {
+      var member = findMember(id);
+      if (!member) return;
+      var net = member.totalSimpanan - member.sisaPinjaman;
+      var label = net >= 0 ? 'dibayarkan ke anggota' : 'ditagihkan ke anggota';
+      var ok = confirm(
+        'Proses keluar ' + member.nama + '?\n\n'
+        + 'Total simpanan: ' + rupiah(member.totalSimpanan) + '\n'
+        + 'Sisa pinjaman: ' + rupiah(member.sisaPinjaman) + '\n'
+        + 'Saldo akhir: ' + rupiah(Math.abs(net)) + ' ' + label + '.'
+      );
+      if (!ok) return;
+
+      setBusy(true);
+      try {
+        var result = await api('processMemberExit', {
+          idAnggota: id,
+          tanggal: todayInput(),
+          catatan: 'Proses keluar anggota'
+        });
+        await loadData();
+        showToast(result.message || 'Anggota dinonaktifkan.');
+      } catch (error) {
+        showToast(errorMessage(error));
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function renderSavings() {
+      document.getElementById('content').innerHTML =
+        '<section class="grid two-grid">'
+        + panel('Transaksi Simpanan', 'Setoran dan penarikan anggota', savingsForm())
+        + panel('Aset Anggota', 'Pengecekan otomatis saat transaksi', '<div id="savingMemberInfo" class="info-strip"></div>')
+        + '</section>'
+        + '<section style="margin-top:14px;">'
+        + panel('Riwayat Simpanan', 'Semua transaksi tercatat ke kas', '<div class="table-wrap"><table><thead><tr>'
+        + '<th>Tanggal</th><th>ID Transaksi</th><th>Anggota</th><th>Jenis</th><th>Tipe</th><th class="numeric">Nominal</th><th>Keterangan</th><th class="numeric no-print">PDF</th>'
+        + '</tr></thead><tbody>' + savingsRows() + '</tbody></table></div>')
+        + '</section>';
+      updateSavingMemberInfo();
+    }
+
+    function savingsForm() {
+      return '<form id="savingForm" class="form-grid" onsubmit="submitSaving(event)">'
+        + field('Tanggal', '<input type="date" name="tanggal" value="' + todayInput() + '" required>')
+        + field('Anggota', '<select name="idAnggota" id="savingMember" onchange="updateSavingMemberInfo()" required><option value="">Pilih anggota</option>' + memberOptions() + '</select>')
+        + field('Jenis Simpanan', '<select name="jenisSimpanan">' + option('Sukarela') + option('Wajib') + option('Pokok') + '</select>')
+        + field('Tipe Transaksi', '<select name="tipeTransaksi">' + option('Setoran') + option('Penarikan') + '</select>')
+        + field('Nominal', '<input type="number" name="nominal" min="1" step="1" required>')
+        + field('Keterangan', '<input name="keterangan" placeholder="Opsional">')
+        + '<div class="form-actions full"><button class="btn primary" type="submit"><i data-lucide="save"></i>Simpan Transaksi</button></div>'
+        + '</form>';
+    }
+
+    function updateSavingMemberInfo() {
+      var el = document.getElementById('savingMemberInfo');
+      if (!el) return;
+      var select = document.getElementById('savingMember');
+      var member = select ? findMember(select.value) : null;
+      if (!member) {
+        el.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">Pilih anggota untuk melihat saldo.</div>';
+        return;
+      }
+      el.innerHTML =
+        infoItem('Pokok', rupiah(member.simpananPokok))
+        + infoItem('Wajib', rupiah(member.simpananWajib))
+        + infoItem('Sukarela', rupiah(member.simpananSukarela))
+        + infoItem('Aset Bersih', rupiah(member.asetBersih));
+    }
+
+    async function submitSaving(event) {
+      event.preventDefault();
+      var payload = formPayload(event.target);
+      payload.nominal = Number(payload.nominal || 0);
+      setBusy(true);
+      try {
+        var result = await api('saveSavingTransaction', payload);
+        event.target.reset();
+        await loadData();
+        showToast('Transaksi simpanan tersimpan.');
+        if (confirm('Download kuitansi transaksi?')) {
+          await downloadReceipt('simpanan', result.transaction.idTransaksi);
+        }
+      } catch (error) {
+        showToast(errorMessage(error));
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function savingsRows() {
+      var rows = state.data.savings || [];
+      if (!rows.length) return emptyRow(8, 'Belum ada transaksi simpanan.');
+      return rows.map(function (row) {
+        return '<tr>'
+          + '<td>' + formatDate(row.tanggal) + '</td>'
+          + '<td><strong>' + escapeHtml(row.idTransaksi) + '</strong></td>'
+          + '<td>' + escapeHtml(row.nama) + '<br><small>' + escapeHtml(row.idAnggota) + '</small></td>'
+          + '<td>' + escapeHtml(row.jenisSimpanan) + '</td>'
+          + '<td>' + transactionPill(row.tipeTransaksi) + '</td>'
+          + '<td class="numeric">' + rupiah(row.nominal) + '</td>'
+          + '<td>' + escapeHtml(row.keterangan || '-') + '</td>'
+          + '<td class="numeric no-print"><button class="icon-button" onclick="downloadReceipt(\'simpanan\', \'' + row.idTransaksi + '\')" title="Download PDF"><i data-lucide="download"></i></button></td>'
+          + '</tr>';
+      }).join('');
+    }
+
+    function renderLoans() {
+      document.getElementById('content').innerHTML =
+        '<section class="grid two-grid">'
+        + panel('Pengajuan Pinjaman', 'Kalkulasi flat berdasarkan tenor', loanForm())
+        + panel('Ringkasan Pinjaman', 'Pinjaman aktif dan status lunas', loanSummary())
+        + '</section>'
+        + '<section style="margin-top:14px;">'
+        + panel('Daftar Pinjaman', 'Pembayaran angsuran diproses dari tabel ini', loansTable())
+        + '</section>'
+        + '<section style="margin-top:14px;">'
+        + panel('Riwayat Pembayaran Angsuran', 'Pembayaran terbaru berada di atas', installmentsTable())
+        + '</section>';
+      setTimeout(updateLoanCalc, 0);
+    }
+
+    function loanForm() {
+      var settings = state.data.settings || {};
+      return '<form id="loanForm" class="form-grid" onsubmit="submitLoan(event)">'
+        + field('Tanggal', '<input type="date" name="tanggal" value="' + todayInput() + '" required>')
+        + field('Anggota', '<select name="idAnggota" required><option value="">Pilih anggota</option>' + memberOptions() + '</select>')
+        + field('Akad Syariah', '<select name="akad" required><option>Murabahah</option><option>Qardh</option><option>Ijarah Multijasa</option></select>')
+        + field('Program', '<input name="program" placeholder="Contoh: MIKA General Financing">')
+        + field('Tujuan Pembiayaan', '<input name="tujuan" placeholder="Pembelian barang, pendidikan, usaha..." required>', 'full')
+        + field('Pokok Pembiayaan', '<input id="loanPrincipal" type="number" name="pokok" min="1" step="1" required oninput="updateLoanCalc()">')
+        + field('Tenor Bulan', '<input id="loanTenor" type="number" name="tenor" min="1" step="1" value="12" required oninput="updateLoanCalc()">')
+        + field('Margin/Ujrah per Bulan (%)', '<input id="loanRate" type="number" name="bungaPersen" min="0" step="0.01" value="' + escapeHtml(settings.bungaPinjaman || 0) + '" required oninput="updateLoanCalc()">')
+        + field('Biaya Admin', '<input id="loanAdmin" type="number" name="biayaAdmin" min="0" step="1" value="' + escapeHtml(settings.biayaAdmin || 0) + '" oninput="updateLoanCalc()">')
+        + field('Keterangan', '<textarea name="keterangan"></textarea>', 'full')
+        + '<div class="calculator-result full">'
+        + '<div><span>Total Margin/Ujrah</span><strong id="calcInterest">Rp 0</strong></div>'
+        + '<div><span>Total Tagihan</span><strong id="calcTotal">Rp 0</strong></div>'
+        + '<div><span>Angsuran</span><strong id="calcInstallment">Rp 0</strong></div>'
+        + '<div><span>Admin</span><strong id="calcAdmin">Rp 0</strong></div>'
+        + '</div>'
+        + '<div class="form-actions full"><button class="btn primary" type="submit"><i data-lucide="save"></i>Ajukan Pinjaman</button></div>'
+        + '</form>';
+    }
+
+    function updateLoanCalc() {
+      var pokok = numberFromInput('loanPrincipal');
+      var tenor = Math.max(1, numberFromInput('loanTenor'));
+      var rate = numberFromInput('loanRate');
+      var admin = numberFromInput('loanAdmin');
+      var totalBunga = Math.round(pokok * (rate / 100) * tenor);
+      var total = pokok + totalBunga;
+      var angsuran = tenor ? Math.round(total / tenor) : 0;
+      setText('calcInterest', rupiah(totalBunga));
+      setText('calcTotal', rupiah(total));
+      setText('calcInstallment', rupiah(angsuran));
+      setText('calcAdmin', rupiah(admin));
+    }
+
+    async function submitLoan(event) {
+      event.preventDefault();
+      var payload = formPayload(event.target);
+      payload.pokok = Number(payload.pokok || 0);
+      payload.tenor = Number(payload.tenor || 0);
+      payload.bungaPersen = Number(payload.bungaPersen || 0);
+      payload.biayaAdmin = Number(payload.biayaAdmin || 0);
+      setBusy(true);
+      try {
+        var result = await api('createLoan', payload);
+        event.target.reset();
+        await loadData();
+        showToast('Pinjaman berhasil dibuat.');
+        if (confirm('Download bukti pencairan pinjaman?')) {
+          await downloadReceipt('pinjaman', result.loan.idPinjaman);
+        }
+      } catch (error) {
+        showToast(errorMessage(error));
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function loanSummary() {
+      var active = state.data.loans.filter(function (loan) { return loan.status !== 'Lunas'; });
+      var principal = active.reduce(function (sum, loan) { return sum + loan.pokok; }, 0);
+      var outstanding = active.reduce(function (sum, loan) { return sum + loan.sisaPinjaman; }, 0);
+      var paid = state.data.loans.reduce(function (sum, loan) { return sum + loan.totalDibayar; }, 0);
+      return '<div class="info-strip">'
+        + infoItem('Aktif', number(active.length))
+        + infoItem('Pokok Aktif', rupiah(principal))
+        + infoItem('Sisa Tagihan', rupiah(outstanding))
+        + infoItem('Terbayar', rupiah(paid))
+        + '</div>';
+    }
+
+    function loansTable() {
+      var rows = state.data.loans || [];
+      if (!rows.length) return '<div class="empty-state">Belum ada pinjaman.</div>';
+      return '<div class="table-wrap"><table><thead><tr>'
+        + '<th>Tanggal</th><th>ID Pinjaman</th><th>Anggota</th><th>Akad / Tujuan</th><th class="numeric">Pokok</th><th class="numeric">Tagihan</th><th class="numeric">Angsuran</th><th class="numeric">Sisa</th><th>Status</th><th class="numeric no-print">Aksi</th>'
+        + '</tr></thead><tbody>' + rows.map(function (loan) {
+          return '<tr>'
+            + '<td>' + formatDate(loan.tanggal) + '</td>'
+            + '<td><strong>' + escapeHtml(loan.idPinjaman) + '</strong></td>'
+            + '<td>' + escapeHtml(loan.nama) + '<br><small>' + escapeHtml(loan.idAnggota) + '</small></td>'
+            + '<td><strong>' + escapeHtml(loan.akad || 'Murabahah') + '</strong><br><small>' + escapeHtml(loan.tujuan || '-') + '</small></td>'
+            + '<td class="numeric">' + rupiah(loan.pokok) + '</td>'
+            + '<td class="numeric">' + rupiah(loan.totalTagihan) + '</td>'
+            + '<td class="numeric">' + rupiah(loan.angsuranBulanan) + '</td>'
+            + '<td class="numeric">' + rupiah(loan.sisaPinjaman) + '</td>'
+            + '<td>' + statusPill(loan.status) + '</td>'
+            + '<td class="numeric no-print"><div class="table-actions">'
+            + '<button class="icon-button" onclick="openPaymentForm(\'' + loan.idPinjaman + '\')" title="Bayar angsuran" ' + (loan.status === 'Lunas' ? 'disabled' : '') + '><i data-lucide="circle-dollar-sign"></i></button>'
+            + '<button class="icon-button" onclick="downloadReceipt(\'pinjaman\', \'' + loan.idPinjaman + '\')" title="Download bukti"><i data-lucide="download"></i></button>'
+            + '</div></td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+
+    function installmentsTable() {
+      var rows = state.data.installments || [];
+      if (!rows.length) return '<div class="empty-state">Belum ada pembayaran angsuran.</div>';
+      return '<div class="table-wrap"><table><thead><tr>'
+        + '<th>Tanggal</th><th>ID Angsuran</th><th>ID Pinjaman</th><th>Anggota</th><th class="numeric">Ke</th><th class="numeric">Nominal</th><th class="numeric">Denda</th><th class="numeric">Total</th><th class="numeric">Sisa</th><th class="numeric no-print">PDF</th>'
+        + '</tr></thead><tbody>' + rows.map(function (row) {
+          return '<tr>'
+            + '<td>' + formatDate(row.tanggal) + '</td>'
+            + '<td><strong>' + escapeHtml(row.idAngsuran) + '</strong></td>'
+            + '<td>' + escapeHtml(row.idPinjaman) + '</td>'
+            + '<td>' + escapeHtml(row.nama) + '<br><small>' + escapeHtml(row.idAnggota) + '</small></td>'
+            + '<td class="numeric">' + number(row.angsuranKe) + '</td>'
+            + '<td class="numeric">' + rupiah(row.nominal) + '</td>'
+            + '<td class="numeric">' + rupiah(row.denda) + '</td>'
+            + '<td class="numeric">' + rupiah(row.totalBayar) + '</td>'
+            + '<td class="numeric">' + rupiah(row.sisaSetelahBayar) + '</td>'
+            + '<td class="numeric no-print"><button class="icon-button" onclick="downloadReceipt(\'angsuran\', \'' + row.idAngsuran + '\')" title="Download PDF"><i data-lucide="download"></i></button></td>'
+            + '</tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+
+    function openPaymentForm(idPinjaman) {
+      var loan = findLoan(idPinjaman);
+      if (!loan) return;
+      var defaultPay = Math.min(loan.angsuranBulanan, loan.sisaPinjaman);
+      var body = '<div class="info-strip">'
+        + infoItem('Anggota', escapeHtml(loan.nama))
+        + infoItem('Angsuran', rupiah(loan.angsuranBulanan))
+        + infoItem('Sisa', rupiah(loan.sisaPinjaman))
+        + infoItem('Status', escapeHtml(loan.status))
+        + '</div>'
+        + '<form id="paymentForm" class="form-grid" onsubmit="submitPayment(event)">'
+        + '<input type="hidden" name="idPinjaman" value="' + escapeHtml(loan.idPinjaman) + '">'
+        + field('Tanggal', '<input type="date" name="tanggal" value="' + todayInput() + '" required>')
+        + field('Nominal Angsuran', '<input type="number" name="nominal" min="1" step="1" value="' + defaultPay + '" required>')
+        + field('Denda', '<input type="number" name="denda" min="0" step="1" value="0">')
+        + field('Keterangan', '<input name="keterangan" placeholder="Opsional">')
+        + '</form>';
+      openModal('Pembayaran Angsuran', body, '<button class="btn" onclick="closeModal()">Batal</button><button class="btn primary" form="paymentForm" type="submit"><i data-lucide="save"></i>Proses Bayar</button>');
+    }
+
+    async function submitPayment(event) {
+      event.preventDefault();
+      var payload = formPayload(event.target);
+      payload.nominal = Number(payload.nominal || 0);
+      payload.denda = Number(payload.denda || 0);
+      setBusy(true);
+      try {
+        var result = await api('payInstallment', payload);
+        closeModal();
+        await loadData();
+        showToast(result.loanStatus === 'Lunas' ? 'Pinjaman sudah lunas.' : 'Angsuran tersimpan.');
+        if (confirm('Download kuitansi angsuran?')) {
+          await downloadReceipt('angsuran', result.installment.idAngsuran);
+        }
+      } catch (error) {
+        showToast(errorMessage(error));
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function renderReports() {
+      var report = state.data.accounting;
+      document.getElementById('content').innerHTML =
+        '<div class="print-title"><h2>Akuntansi dan Laporan Keuangan</h2><p>' + escapeHtml(report.period.label) + '</p></div>'
+        + periodControls()
+        + '<div class="toolbar no-print"><span></span><div class="table-actions">'
+        + '<button class="btn" onclick="syncJournals()"><i data-lucide="refresh-cw"></i>Sinkron Jurnal</button>'
+        + '<button class="btn blue" onclick="downloadFinancialExcel()"><i data-lucide="file-spreadsheet"></i>Download Excel</button>'
+        + '<button class="btn primary" onclick="window.print()"><i data-lucide="printer"></i>Cetak</button>'
+        + '</div></div>'
+        + accountingTabs()
+        + '<div id="accountingContent">' + accountingTabContent(report) + '</div>';
+    }
+
+    function accountingTabs() {
+      var tabs = [
+        ['ringkasan', 'Ringkasan', 'gauge'],
+        ['transaksi', 'Transaksi Bank', 'landmark'],
+        ['coa', 'COA', 'list-tree'],
+        ['kas', 'Rincian Kas', 'banknote'],
+        ['jurnal', 'Jurnal', 'book-open'],
+        ['tb', 'Trial Balance', 'scale'],
+        ['neraca', 'Neraca', 'columns-3'],
+        ['laba', 'Laba Rugi', 'chart-no-axes-combined'],
+        ['pinjaman', 'Rincian Pinjaman', 'hand-coins'],
+        ['shu', 'Pembagian SHU', 'pie-chart'],
+        ['aset', 'Aset Tetap', 'monitor-cog'],
+        ['kebajikan', 'Dana Kebajikan', 'heart-handshake'],
+        ['administrasi', 'Administrasi', 'folder-check']
+      ];
+      return '<nav class="tabs no-print">' + tabs.map(function (tab) {
+        return '<button class="' + (state.accountingTab === tab[0] ? 'active' : '') + '" onclick="setAccountingTab(\'' + tab[0] + '\')">'
+          + '<i data-lucide="' + tab[2] + '"></i>' + tab[1] + '</button>';
+      }).join('') + '</nav>';
+    }
+
+    function setAccountingTab(tab) {
+      state.accountingTab = tab;
+      renderReports();
+      activateIcons();
+    }
+
+    function accountingTabContent(report) {
+      if (state.accountingTab === 'transaksi') return financialTransactionView(report);
+      if (state.accountingTab === 'coa') return coaView(report);
+      if (state.accountingTab === 'kas') return panel('Rincian Kas dan Bank', report.period.label, mutationTable(report.cash.rows));
+      if (state.accountingTab === 'jurnal') return panel('Jurnal Umum', report.period.label, journalTable(report.journal));
+      if (state.accountingTab === 'tb') return panel('Trial Balance', report.period.label, trialBalanceTable(report.trialBalance));
+      if (state.accountingTab === 'neraca') return statementView('Laporan Posisi Keuangan', report.period.label, report.neraca);
+      if (state.accountingTab === 'laba') return profitLossView(report.labaRugi, report.period.label);
+      if (state.accountingTab === 'pinjaman') return panel('Rincian Pembiayaan', 'Akad, margin, tagihan, dan saldo berjalan', loansTable());
+      if (state.accountingTab === 'shu') return shuView(report);
+      if (state.accountingTab === 'aset') return fixedAssetView(report);
+      if (state.accountingTab === 'kebajikan') return benevolentView(report);
+      if (state.accountingTab === 'administrasi') return administrationView(report);
+      return accountingOverview(report);
+    }
+
+    function accountingOverview(report) {
+      var journalOk = Math.abs(report.checks.journalDifference) < 1;
+      var balanceOk = Math.abs(report.checks.balanceDifference) < 1;
+      return '<section class="check-strip">'
+        + checkItem('Jurnal Debit = Kredit', journalOk ? 'Balance' : rupiah(report.checks.journalDifference), journalOk)
+        + checkItem('Neraca Seimbang', balanceOk ? 'Balance' : rupiah(report.checks.balanceDifference), balanceOk)
+        + checkItem('Akun Belum Diklasifikasi', number(report.checks.unclassifiedCount), report.checks.unclassifiedCount === 0)
+        + '</section>'
+        + '<section class="grid metrics-grid">'
+        + metricCard('Kas Akhir', rupiah(report.cash.saldoAkhir), 'banknote', 'tone-green', 'Kas masuk ' + rupiah(report.cash.totalMasuk))
+        + metricCard('Total Aset', rupiah(report.neraca.totalAset), 'landmark', 'tone-blue', report.period.label)
+        + metricCard('Kewajiban', rupiah(report.neraca.totalKewajiban), 'receipt-text', 'tone-amber', 'Dana anggota dan kewajiban lain')
+        + metricCard('Ekuitas', rupiah(report.neraca.totalEkuitas), 'wallet', 'tone-green', 'Termasuk SHU berjalan')
+        + metricCard('SHU Bersih', rupiah(report.labaRugi.shuBersih), 'badge-dollar-sign', report.labaRugi.shuBersih >= 0 ? 'tone-green' : 'tone-red', 'Pendapatan dikurangi beban')
+        + '</section>'
+        + '<section class="grid two-grid" style="margin-top:14px;">'
+        + panel('Laba Rugi Ringkas', report.period.label, compactStatement(report.labaRugi.pendapatan, 'Total Pendapatan', report.labaRugi.totalPendapatan)
+          + compactStatement(report.labaRugi.beban, 'Total Beban', report.labaRugi.totalBeban)
+          + '<div class="summary-strip" style="margin:12px 0 0;">' + infoItem('SHU Bersih', rupiah(report.labaRugi.shuBersih)) + '</div>')
+        + panel('Status Administrasi', 'Dokumen dan register pendukung', '<div class="info-strip">'
+          + infoItem('COA Aktif', number(report.accounts.length))
+          + infoItem('Rekening', number(report.bankAccounts.length))
+          + infoItem('Aset Tetap', number(report.fixedAssets.length))
+          + infoItem('Dokumen', number(report.administration.length))
+          + '</div>')
+        + '</section>';
+    }
+
+    function checkItem(label, value, ok) {
+      return '<div class="check-item ' + (ok ? '' : 'warn') + '"><strong>' + escapeHtml(label) + '</strong><span>' + escapeHtml(value) + '</span></div>';
+    }
+
+    function financialTransactionView(report) {
+      var cashOptions = accountOptions('', function (a) { return a.kategori === 'ASET' && (a.grup.indexOf('Kas') >= 0 || a.kodeAkun.indexOf('111') === 0); });
+      return '<section class="grid two-grid">'
+        + panel('Catat Penerimaan / Pengeluaran Bank', 'Jurnal debit-kredit dibuat otomatis',
+          '<form class="form-grid" onsubmit="submitFinancialTransaction(event)">'
+          + field('Tanggal', '<input type="date" name="tanggal" value="' + todayInput() + '" required>')
+          + field('Jenis', '<select name="jenis"><option>Keluar</option><option>Masuk</option><option>Transfer</option></select>')
+          + field('No. Bukti', '<input name="noBukti" placeholder="BKK/BKM/BR-001">')
+          + field('Rekening Kas/Bank', '<select name="kodeRekening" required>' + cashOptions + '</select>')
+          + field('Akun Lawan', '<select name="kodeLawanAkun" required>' + accountOptions() + '</select>')
+          + field('Nominal', '<input type="number" name="nominal" min="1" step="1" required>')
+          + field('Pihak', '<input name="pihak" placeholder="Bank, vendor, anggota...">')
+          + field('Keterangan', '<textarea name="keterangan" required></textarea>', 'full')
+          + '<div class="form-actions full"><button class="btn primary" type="submit"><i data-lucide="save"></i>Simpan Transaksi</button></div>'
+          + '</form>')
+        + panel('Rekening Kas dan Bank', 'Kelola rekening yang digunakan',
+          '<form class="form-grid" onsubmit="submitBankAccount(event)">'
+          + field('Nama Rekening', '<input name="namaRekening" required>')
+          + field('Bank', '<input name="bank">')
+          + field('Nomor Rekening', '<input name="nomorRekening">')
+          + field('Kode Akun', '<select name="kodeAkun" required>' + cashOptions + '</select>')
+          + field('Saldo Awal', '<input type="number" name="saldoAwal" min="0" step="1" value="0">')
+          + '<div class="form-actions full"><button class="btn" type="submit"><i data-lucide="plus"></i>Tambah Rekening</button></div>'
+          + '</form><div style="height:12px;"></div>' + bankAccountTable(report.bankAccounts))
+        + '</section>'
+        + '<section style="margin-top:14px;">' + panel('Transaksi Keuangan Lainnya', 'Pengeluaran bank, penerimaan lain, dan transfer',
+          financialTransactionTable(report.transactions)) + '</section>';
+    }
+
+    function coaView(report) {
+      return '<section class="grid two-grid">'
+        + panel('Tambah / Ubah Akun', 'COA standar sudah disiapkan dan dapat diperluas',
+          '<form class="form-grid" onsubmit="submitCoa(event)">'
+          + field('Kode Akun', '<input name="kodeAkun" required>')
+          + field('Nama Akun', '<input name="namaAkun" required>')
+          + field('Kategori', '<select name="kategori"><option>ASET</option><option>KEWAJIBAN</option><option>EKUITAS</option><option>PENDAPATAN</option><option>BEBAN</option><option>DANA KEBAJIKAN</option></select>')
+          + field('Saldo Normal', '<select name="normal"><option>DEBET</option><option>KREDIT</option></select>')
+          + field('Laporan', '<select name="laporan"><option>NERACA</option><option>LABA RUGI</option><option>DANA KEBAJIKAN</option></select>')
+          + field('Grup', '<input name="grup" required>')
+          + field('Keterangan', '<textarea name="keterangan"></textarea>', 'full')
+          + '<div class="form-actions full"><button class="btn primary" type="submit"><i data-lucide="save"></i>Simpan Akun</button></div>'
+          + '</form>')
+        + panel('Panduan Klasifikasi', 'Akun biru dipakai operasional; akun baru harus memiliki kategori dan saldo normal yang benar',
+          '<div class="info-strip">' + infoItem('Total Akun', number(report.coa.length)) + infoItem('Aktif', number(report.accounts.length)) + '</div>'
+          + '<p style="color:var(--muted);font-size:13px;line-height:1.6;">Denda pembiayaan ditempatkan pada Dana Kebajikan, bukan pendapatan koperasi. Margin belum jatuh tempo menggunakan akun Margin Murabahah Tangguhan.</p>')
+        + '</section><section style="margin-top:14px;">' + panel('Chart of Accounts', 'Daftar akun lengkap', coaTable(report.coa)) + '</section>';
+    }
+
+    function mutationTable(rows) {
+      if (!rows.length) return '<div class="empty-state">Belum ada mutasi kas pada periode ini.</div>';
+      return '<div class="table-wrap"><table><thead><tr>'
+        + '<th>Tanggal</th><th>Sumber</th><th>Ref</th><th>Anggota/Pihak</th><th class="numeric">Masuk</th><th class="numeric">Keluar</th><th class="numeric">Saldo</th><th>Keterangan</th>'
+        + '</tr></thead><tbody>' + rows.map(function (row) {
+          return '<tr><td>' + formatDate(row.tanggal) + '</td><td>' + escapeHtml(row.sumber) + '</td><td>' + escapeHtml(row.refId) + '</td>'
+            + '<td>' + escapeHtml(row.nama || '-') + '</td><td class="numeric">' + rupiah(row.masuk) + '</td><td class="numeric">' + rupiah(row.keluar) + '</td>'
+            + '<td class="numeric"><strong>' + rupiah(row.saldo) + '</strong></td><td>' + escapeHtml(row.keterangan || '-') + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+
+    function journalTable(rows) {
+      if (!rows.length) return '<div class="empty-state">Belum ada jurnal pada periode ini. Gunakan tombol Sinkron Jurnal untuk transaksi lama.</div>';
+      return '<div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>No Bukti</th><th>Sumber</th><th>Ref</th><th>Kode</th><th>Akun</th><th class="numeric">Debet</th><th class="numeric">Kredit</th><th>Memo</th></tr></thead><tbody>'
+        + rows.map(function (r) { return '<tr><td>' + formatDate(r.tanggal) + '</td><td>' + escapeHtml(r.noBukti) + '</td><td>' + escapeHtml(r.sumber) + '</td><td>' + escapeHtml(r.refId) + '</td><td>' + escapeHtml(r.kodeAkun) + '</td><td>' + escapeHtml(r.namaAkun) + '</td><td class="numeric">' + rupiah(r.debet) + '</td><td class="numeric">' + rupiah(r.kredit) + '</td><td>' + escapeHtml(r.memo || '-') + '</td></tr>'; }).join('')
+        + '</tbody></table></div>';
+    }
+
+    function trialBalanceTable(tb) {
+      if (!tb.rows.length) return '<div class="empty-state">Trial balance belum memiliki saldo.</div>';
+      return '<div class="table-wrap"><table><thead><tr><th>Kode</th><th>Akun</th><th class="numeric">Awal D</th><th class="numeric">Awal K</th><th class="numeric">Mutasi D</th><th class="numeric">Mutasi K</th><th class="numeric">Akhir D</th><th class="numeric">Akhir K</th></tr></thead><tbody>'
+        + tb.rows.map(function (r) { return '<tr><td>' + escapeHtml(r.kodeAkun) + '</td><td>' + escapeHtml(r.namaAkun) + '</td><td class="numeric">' + rupiah(r.saldoAwalDebet) + '</td><td class="numeric">' + rupiah(r.saldoAwalKredit) + '</td><td class="numeric">' + rupiah(r.mutasiDebet) + '</td><td class="numeric">' + rupiah(r.mutasiKredit) + '</td><td class="numeric">' + rupiah(r.saldoAkhirDebet) + '</td><td class="numeric">' + rupiah(r.saldoAkhirKredit) + '</td></tr>'; }).join('')
+        + '<tr><td colspan="2"><strong>TOTAL</strong></td><td class="numeric"><strong>' + rupiah(tb.totalSaldoAwalDebet) + '</strong></td><td class="numeric"><strong>' + rupiah(tb.totalSaldoAwalKredit) + '</strong></td><td class="numeric"><strong>' + rupiah(tb.totalMutasiDebet) + '</strong></td><td class="numeric"><strong>' + rupiah(tb.totalMutasiKredit) + '</strong></td><td class="numeric"><strong>' + rupiah(tb.totalSaldoAkhirDebet) + '</strong></td><td class="numeric"><strong>' + rupiah(tb.totalSaldoAkhirKredit) + '</strong></td></tr>'
+        + '</tbody></table></div>';
+    }
+
+    function statementView(title, subtitle, data) {
+      return '<section class="grid two-grid">'
+        + panel('Aset', subtitle, statementTable(data.aset, 'Total Aset', data.totalAset))
+        + panel('Kewajiban dan Ekuitas', subtitle, statementTable(data.kewajiban, 'Total Kewajiban', data.totalKewajiban)
+          + '<div style="height:12px;"></div>' + statementTable(data.ekuitas, 'Total Ekuitas', data.totalEkuitas)
+          + '<div class="summary-strip" style="margin:12px 0 0;">' + infoItem('Total Kewajiban + Ekuitas', rupiah(data.totalKewajibanEkuitas)) + '</div>')
+        + '</section>';
+    }
+
+    function profitLossView(data, subtitle) {
+      return '<section class="grid two-grid">'
+        + panel('Pendapatan', subtitle, statementTable(data.pendapatan, 'Total Pendapatan', data.totalPendapatan))
+        + panel('Beban dan SHU', subtitle, statementTable(data.beban, 'Total Beban', data.totalBeban)
+          + '<div class="summary-strip" style="margin:12px 0 0;">' + infoItem('SHU Bersih', rupiah(data.shuBersih)) + '</div>')
+        + '</section>';
+    }
+
+    function statementTable(rows, totalLabel, total) {
+      return '<div class="table-wrap"><table style="min-width:520px;"><thead><tr><th>Grup</th><th>Akun</th><th class="numeric">Nominal</th></tr></thead><tbody>'
+        + (rows.length ? rows.map(function (r) { return '<tr><td>' + escapeHtml(r.grup || '-') + '</td><td>' + escapeHtml(r.akun) + '</td><td class="numeric">' + rupiah(r.nominal) + '</td></tr>'; }).join('') : emptyRow(3, 'Belum ada saldo.'))
+        + '<tr><td colspan="2"><strong>' + escapeHtml(totalLabel) + '</strong></td><td class="numeric"><strong>' + rupiah(total) + '</strong></td></tr></tbody></table></div>';
+    }
+
+    function compactStatement(rows, totalLabel, total) {
+      return statementTable(rows, totalLabel, total);
+    }
+
+    function shuView(report) {
+      return '<section class="grid two-grid">'
+        + panel('Kebijakan Pembagian SHU', 'Total persentase harus 100%',
+          '<div class="summary-strip">' + infoItem('SHU Bersih', rupiah(report.shu.shu)) + infoItem('Total Alokasi', number(report.shu.totalPersentase) + '%') + '</div>'
+          + '<div class="table-wrap"><table style="min-width:520px;"><thead><tr><th>Pos</th><th class="numeric">Persentase</th><th class="numeric">Jumlah</th></tr></thead><tbody>'
+          + report.shu.rows.map(function (r) { return '<tr><td>' + escapeHtml(r.pos) + '</td><td class="numeric">' + number(r.persentase) + '%</td><td class="numeric">' + rupiah(r.jumlah) + '</td></tr>'; }).join('')
+          + '</tbody></table></div>')
+        + panel('Catatan Syariah', 'Distribusi dilakukan setelah laporan ditetapkan RAT',
+          '<p style="color:var(--muted);font-size:13px;line-height:1.7;">Persentase dapat diubah di Pengaturan. Denda pembiayaan tidak masuk SHU dan dicatat terpisah sebagai dana kebajikan.</p>')
+        + '</section>';
+    }
+
+    function fixedAssetView(report) {
+      return '<section class="grid two-grid">'
+        + panel('Register Aset Tetap', 'Catat perolehan, umur manfaat, dan nilai buku',
+          '<form class="form-grid" onsubmit="submitFixedAsset(event)">'
+          + field('Tanggal Perolehan', '<input type="date" name="tanggalPerolehan" value="' + todayInput() + '" required>')
+          + field('Nama Aset', '<input name="namaAset" required>')
+          + field('Kategori', '<input name="kategori" value="Inventaris">')
+          + field('Nilai Perolehan', '<input type="number" name="nilaiPerolehan" min="1" step="1" required>')
+          + field('Nilai Residu', '<input type="number" name="nilaiResidu" min="0" step="1" value="0">')
+          + field('Umur Manfaat (bulan)', '<input type="number" name="umurBulan" min="1" step="1" value="48">')
+          + field('Akumulasi Penyusutan', '<input type="number" name="akumulasiPenyusutan" min="0" step="1" value="0">')
+          + field('Pembayaran', '<label class="inline-field"><input type="checkbox" name="bayarSekarang" checked style="width:auto;min-height:auto;"> Catat pembelian dari rekening utama</label>')
+          + field('Keterangan', '<input name="keterangan">')
+          + '<div class="form-actions full"><button class="btn primary" type="submit"><i data-lucide="save"></i>Simpan Aset</button></div></form>')
+        + panel('Daftar Aset', 'Nilai buku berdasarkan data register', fixedAssetTable(report.fixedAssets))
+        + '</section>';
+    }
+
+    function benevolentView(report) {
+      return '<section class="grid two-grid">'
+        + panel('Transaksi Dana Kebajikan', 'Denda dan dana sosial dipisahkan dari pendapatan koperasi',
+          '<form class="form-grid" onsubmit="submitBenevolent(event)">'
+          + field('Tanggal', '<input type="date" name="tanggal" value="' + todayInput() + '" required>')
+          + field('Jenis', '<select name="jenis"><option>Sumber</option><option>Penggunaan</option></select>')
+          + field('Sumber/Penggunaan', '<input name="sumberPenggunaan" required>')
+          + field('Nominal', '<input type="number" name="nominal" min="1" step="1" required>')
+          + field('No Bukti', '<input name="noBukti">')
+          + field('Keterangan', '<textarea name="keterangan"></textarea>', 'full')
+          + '<div class="form-actions full"><button class="btn primary" type="submit"><i data-lucide="save"></i>Simpan</button></div></form>')
+        + panel('Riwayat Dana Kebajikan', report.period.label, benevolentTable(report.benevolentFunds))
+        + '</section>';
+    }
+
+    function administrationView(report) {
+      return '<section class="grid two-grid">'
+        + panel('Register Administrasi', 'Dokumen legal, pajak, RAT, audit, SOP, dan akad',
+          '<form class="form-grid" onsubmit="submitAdministration(event)">'
+          + field('Jenis Dokumen', '<select name="jenisDokumen"><option>RAT</option><option>Akta dan Badan Hukum</option><option>NIB / Perizinan</option><option>NPWP dan Pajak</option><option>Audit / Pemeriksaan</option><option>SOP Keuangan</option><option>Kontrak / Akad</option><option>Lainnya</option></select>')
+          + field('Nomor', '<input name="nomor">')
+          + field('Tanggal', '<input type="date" name="tanggal" value="' + todayInput() + '">')
+          + field('Berlaku Sampai', '<input type="date" name="berlakuSampai">')
+          + field('Penanggung Jawab', '<input name="penanggungJawab">')
+          + field('Status', '<select name="status"><option>Aktif</option><option>Perlu Diperbarui</option><option>Arsip</option></select>')
+          + field('Link Dokumen', '<input type="url" name="linkDokumen" placeholder="https://drive.google.com/...">', 'full')
+          + field('Keterangan', '<textarea name="keterangan"></textarea>', 'full')
+          + '<div class="form-actions full"><button class="btn primary" type="submit"><i data-lucide="save"></i>Simpan Dokumen</button></div></form>')
+        + panel('Daftar Dokumen', 'Pantau kelengkapan administrasi', administrationTable(report.administration))
+        + '</section>';
+    }
+
+    function accountOptions(selected, filterFn) {
+      var accounts = (state.data.accounting && state.data.accounting.accounts) || [];
+      if (filterFn) accounts = accounts.filter(filterFn);
+      return '<option value="">Pilih akun</option>' + accounts.map(function (a) {
+        return '<option value="' + escapeHtml(a.kodeAkun) + '" ' + (selected === a.kodeAkun ? 'selected' : '') + '>'
+          + escapeHtml(a.kodeAkun + ' - ' + a.namaAkun) + '</option>';
+      }).join('');
+    }
+
+    function coaTable(rows) {
+      return '<div class="table-wrap"><table><thead><tr><th>Kode</th><th>Nama Akun</th><th>Kategori</th><th>Normal</th><th>Laporan</th><th>Grup</th><th>Status</th></tr></thead><tbody>'
+        + (rows.length ? rows.map(function (r) {
+          return '<tr><td><strong>' + escapeHtml(r.kodeAkun) + '</strong></td><td>' + escapeHtml(r.namaAkun) + '</td><td>' + escapeHtml(r.kategori) + '</td><td>' + escapeHtml(r.normal) + '</td><td>' + escapeHtml(r.laporan) + '</td><td>' + escapeHtml(r.grup || '-') + '</td><td>' + statusPill(r.aktif ? 'Aktif' : 'Nonaktif') + '</td></tr>';
+        }).join('') : emptyRow(7, 'COA belum tersedia.')) + '</tbody></table></div>';
+    }
+
+    function bankAccountTable(rows) {
+      if (!rows.length) return '<div class="empty-state">Belum ada rekening.</div>';
+      return '<div class="table-wrap"><table style="min-width:620px;"><thead><tr><th>Nama</th><th>Bank</th><th>No Rekening</th><th>Kode Akun</th><th class="numeric">Saldo Awal</th></tr></thead><tbody>'
+        + rows.map(function (r) { return '<tr><td>' + escapeHtml(r.namaRekening) + '</td><td>' + escapeHtml(r.bank || '-') + '</td><td>' + escapeHtml(r.nomorRekening || '-') + '</td><td>' + escapeHtml(r.kodeAkun) + '</td><td class="numeric">' + rupiah(r.saldoAwal) + '</td></tr>'; }).join('')
+        + '</tbody></table></div>';
+    }
+
+    function financialTransactionTable(rows) {
+      if (!rows.length) return '<div class="empty-state">Belum ada transaksi keuangan lain.</div>';
+      return '<div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>No Bukti</th><th>Jenis</th><th>Rekening</th><th>Akun Lawan</th><th>Pihak</th><th class="numeric">Nominal</th><th>Keterangan</th></tr></thead><tbody>'
+        + rows.map(function (r) { return '<tr><td>' + formatDate(r.tanggal) + '</td><td>' + escapeHtml(r.noBukti) + '</td><td>' + transactionPill(r.jenis) + '</td><td>' + escapeHtml(r.kodeRekening) + '</td><td>' + escapeHtml(r.kodeLawanAkun) + '</td><td>' + escapeHtml(r.pihak || '-') + '</td><td class="numeric">' + rupiah(r.nominal) + '</td><td>' + escapeHtml(r.keterangan || '-') + '</td></tr>'; }).join('')
+        + '</tbody></table></div>';
+    }
+
+    function fixedAssetTable(rows) {
+      if (!rows.length) return '<div class="empty-state">Belum ada aset tetap.</div>';
+      return '<div class="table-wrap"><table style="min-width:720px;"><thead><tr><th>Tanggal</th><th>Aset</th><th>Kategori</th><th class="numeric">Perolehan</th><th class="numeric">Akumulasi</th><th class="numeric">Nilai Buku</th><th>Status</th></tr></thead><tbody>'
+        + rows.map(function (r) { return '<tr><td>' + formatDate(r.tanggalPerolehan) + '</td><td>' + escapeHtml(r.namaAset) + '</td><td>' + escapeHtml(r.kategori) + '</td><td class="numeric">' + rupiah(r.nilaiPerolehan) + '</td><td class="numeric">' + rupiah(r.akumulasiPenyusutan) + '</td><td class="numeric">' + rupiah(r.nilaiBuku) + '</td><td>' + statusPill(r.status) + '</td></tr>'; }).join('')
+        + '</tbody></table></div>';
+    }
+
+    function benevolentTable(rows) {
+      if (!rows.length) return '<div class="empty-state">Belum ada transaksi dana kebajikan.</div>';
+      return '<div class="table-wrap"><table style="min-width:680px;"><thead><tr><th>Tanggal</th><th>Jenis</th><th>Sumber/Penggunaan</th><th>No Bukti</th><th class="numeric">Nominal</th><th>Keterangan</th></tr></thead><tbody>'
+        + rows.map(function (r) { return '<tr><td>' + formatDate(r.tanggal) + '</td><td>' + transactionPill(r.jenis) + '</td><td>' + escapeHtml(r.sumberPenggunaan) + '</td><td>' + escapeHtml(r.noBukti) + '</td><td class="numeric">' + rupiah(r.nominal) + '</td><td>' + escapeHtml(r.keterangan || '-') + '</td></tr>'; }).join('')
+        + '</tbody></table></div>';
+    }
+
+    function administrationTable(rows) {
+      if (!rows.length) return '<div class="empty-state">Belum ada dokumen administrasi.</div>';
+      return '<div class="table-wrap"><table style="min-width:760px;"><thead><tr><th>Dokumen</th><th>Nomor</th><th>Tanggal</th><th>Berlaku Sampai</th><th>PJ</th><th>Status</th><th>Link</th></tr></thead><tbody>'
+        + rows.map(function (r) { return '<tr><td>' + escapeHtml(r.jenisDokumen) + '</td><td>' + escapeHtml(r.nomor || '-') + '</td><td>' + formatDate(r.tanggal) + '</td><td>' + formatDate(r.berlakuSampai) + '</td><td>' + escapeHtml(r.penanggungJawab || '-') + '</td><td>' + statusPill(r.status) + '</td><td>' + (r.linkDokumen ? '<a href="' + escapeHtml(r.linkDokumen) + '" target="_blank">Buka</a>' : '-') + '</td></tr>'; }).join('')
+        + '</tbody></table></div>';
+    }
+
+    async function submitFinancialTransaction(event) {
+      event.preventDefault();
+      var payload = formPayload(event.target);
+      payload.nominal = Number(payload.nominal || 0);
+      await submitAccountingForm_('saveFinancialTransaction', payload, 'Transaksi keuangan tersimpan.');
+    }
+
+    async function submitBankAccount(event) {
+      event.preventDefault();
+      var payload = formPayload(event.target);
+      payload.saldoAwal = Number(payload.saldoAwal || 0);
+      await submitAccountingForm_('saveBankAccount', payload, 'Rekening tersimpan.');
+    }
+
+    async function submitCoa(event) {
+      event.preventDefault();
+      await submitAccountingForm_('saveCoaAccount', formPayload(event.target), 'Akun COA tersimpan.');
+    }
+
+    async function submitFixedAsset(event) {
+      event.preventDefault();
+      var payload = formPayload(event.target);
+      ['nilaiPerolehan', 'nilaiResidu', 'umurBulan', 'akumulasiPenyusutan'].forEach(function (key) { payload[key] = Number(payload[key] || 0); });
+      await submitAccountingForm_('saveFixedAsset', payload, 'Aset tetap tersimpan.');
+    }
+
+    async function submitBenevolent(event) {
+      event.preventDefault();
+      var payload = formPayload(event.target);
+      payload.nominal = Number(payload.nominal || 0);
+      await submitAccountingForm_('saveBenevolentFund', payload, 'Dana kebajikan tersimpan.');
+    }
+
+    async function submitAdministration(event) {
+      event.preventDefault();
+      await submitAccountingForm_('saveAdministrationDocument', formPayload(event.target), 'Dokumen administrasi tersimpan.');
+    }
+
+    async function submitAccountingForm_(fn, payload, message) {
+      setBusy(true);
+      try {
+        await api(fn, payload);
+        await loadData();
+        showToast(message);
+      } catch (error) {
+        showToast(errorMessage(error));
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function syncJournals() {
+      setBusy(true);
+      try {
+        var result = await api('synchronizeOperationalJournals');
+        await loadData();
+        showToast(result.message);
+      } catch (error) {
+        showToast(errorMessage(error));
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function downloadFinancialExcel() {
+      setBusy(true);
+      try {
+        var file = await api('downloadFinancialReportExcel', state.period);
+        downloadBase64File(file);
+        showToast('Laporan Excel siap diunduh.');
+      } catch (error) {
+        showToast(errorMessage(error));
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function renderSettings() {
+      var settings = state.data.settings || {};
+      document.getElementById('content').innerHTML =
+        panel('Profil dan Parameter', 'Pengaturan disimpan ke sheet Pengaturan',
+          '<form id="settingsForm" class="form-grid" onsubmit="submitSettings(event)">'
+          + field('Nama Koperasi', '<input name="namaKoperasi" value="' + escapeHtml(settings.namaKoperasi || '') + '" required>')
+          + field('URL Logo', '<input name="logoUrl" value="' + escapeHtml(settings.logoUrl || '') + '" placeholder="https://...">')
+          + field('Alamat', '<textarea name="alamatKoperasi" required>' + escapeHtml(settings.alamatKoperasi || '') + '</textarea>', 'full')
+          + field('Margin/Ujrah Default per Bulan (%)', '<input type="number" name="bungaPinjaman" min="0" step="0.01" value="' + escapeHtml(settings.bungaPinjaman || 0) + '" required>')
+          + field('Biaya Admin Default', '<input type="number" name="biayaAdmin" min="0" step="1" value="' + escapeHtml(settings.biayaAdmin || 0) + '" required>')
+          + field('Kode Akun Rekening Utama', '<input name="rekeningUtama" value="' + escapeHtml(settings.rekeningUtama || '1112') + '" required>')
+          + field('SHU - Dana Cadangan (%)', '<input type="number" name="persenCadangan" min="0" max="100" step="0.1" value="' + escapeHtml(settings.persenCadangan || 0) + '">')
+          + field('SHU - Jasa Simpanan (%)', '<input type="number" name="persenJasaSimpanan" min="0" max="100" step="0.1" value="' + escapeHtml(settings.persenJasaSimpanan || 0) + '">')
+          + field('SHU - Partisipasi (%)', '<input type="number" name="persenPartisipasi" min="0" max="100" step="0.1" value="' + escapeHtml(settings.persenPartisipasi || 0) + '">')
+          + field('SHU - Bonus Pengelola (%)', '<input type="number" name="persenPengelola" min="0" max="100" step="0.1" value="' + escapeHtml(settings.persenPengelola || 0) + '">')
+          + field('SHU - Dana Sosial (%)', '<input type="number" name="persenSosial" min="0" max="100" step="0.1" value="' + escapeHtml(settings.persenSosial || 0) + '">')
+          + '<div class="form-actions full"><button class="btn primary" type="submit"><i data-lucide="save"></i>Simpan Pengaturan</button></div>'
+          + '</form>');
+    }
+
+    async function submitSettings(event) {
+      event.preventDefault();
+      var payload = formPayload(event.target);
+      payload.bungaPinjaman = Number(payload.bungaPinjaman || 0);
+      payload.biayaAdmin = Number(payload.biayaAdmin || 0);
+      ['persenCadangan', 'persenJasaSimpanan', 'persenPartisipasi', 'persenPengelola', 'persenSosial'].forEach(function (key) {
+        payload[key] = Number(payload[key] || 0);
+      });
+      setBusy(true);
+      try {
+        await api('saveSettings', payload);
+        await loadData();
+        showToast('Pengaturan tersimpan.');
+      } catch (error) {
+        showToast(errorMessage(error));
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function periodControls() {
+      var p = state.period;
+      var mode = p.mode || 'last6';
+      var showYear = mode === 'year' || mode === 'month';
+      var showMonth = mode === 'month';
+      var showCustom = mode === 'custom';
+      return '<div class="period-bar no-print">'
+        + '<label>Periode<select id="periodMode" onchange="periodModeChanged()">'
+        + option('last6', mode, '6 bulan terakhir')
+        + option('year', mode, 'Tahunan')
+        + option('month', mode, 'Bulanan')
+        + option('all', mode, 'Semua')
+        + option('custom', mode, 'Custom')
+        + '</select></label>'
+        + '<label class="period-year ' + (showYear ? '' : 'hidden') + '">Tahun<input id="periodYear" type="number" min="2000" max="2100" value="' + escapeHtml(p.year) + '"></label>'
+        + '<label class="period-month ' + (showMonth ? '' : 'hidden') + '">Bulan<select id="periodMonth">' + monthOptions(p.month) + '</select></label>'
+        + '<label class="period-custom ' + (showCustom ? '' : 'hidden') + '">Dari<input id="periodStart" type="date" value="' + escapeHtml(p.startDate || '') + '"></label>'
+        + '<label class="period-custom ' + (showCustom ? '' : 'hidden') + '">Sampai<input id="periodEnd" type="date" value="' + escapeHtml(p.endDate || '') + '"></label>'
+        + '<button class="btn primary" onclick="applyPeriod()"><i data-lucide="filter"></i>Filter</button>'
+        + '</div>';
+    }
+
+    function periodModeChanged() {
+      var mode = document.getElementById('periodMode').value;
+      document.querySelectorAll('.period-year').forEach(function (el) {
+        el.classList.toggle('hidden', !(mode === 'year' || mode === 'month'));
+      });
+      document.querySelectorAll('.period-month').forEach(function (el) {
+        el.classList.toggle('hidden', mode !== 'month');
+      });
+      document.querySelectorAll('.period-custom').forEach(function (el) {
+        el.classList.toggle('hidden', mode !== 'custom');
+      });
+    }
+
+    function applyPeriod() {
+      var mode = document.getElementById('periodMode').value;
+      state.period = {
+        mode: mode,
+        year: Number(valueOf('periodYear')) || new Date().getFullYear(),
+        month: Number(valueOf('periodMonth')) || new Date().getMonth() + 1,
+        startDate: valueOf('periodStart'),
+        endDate: valueOf('periodEnd')
+      };
+      loadData();
+    }
+
+    async function downloadReceipt(type, id) {
+      setBusy(true);
+      try {
+        var file = await api('downloadReceiptPdf', type, id);
+        downloadBase64File(file);
+        showToast('PDF siap diunduh.');
+      } catch (error) {
+        showToast(errorMessage(error));
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function downloadBase64File(file) {
+      var blob = base64ToBlob(file.base64, file.mimeType);
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      link.href = url;
+      link.download = file.filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    }
+
+    function base64ToBlob(base64, mimeType) {
+      var binary = atob(base64);
+      var length = binary.length;
+      var bytes = new Uint8Array(length);
+      for (var i = 0; i < length; i++) bytes[i] = binary.charCodeAt(i);
+      return new Blob([bytes], { type: mimeType });
+    }
+
+    function panel(title, subtitle, body) {
+      return '<div class="panel"><div class="panel-header"><div><h3>' + escapeHtml(title) + '</h3><p>' + escapeHtml(subtitle || '') + '</p></div></div><div class="panel-body">' + body + '</div></div>';
+    }
+
+    function metricCard(label, value, icon, tone, note) {
+      return '<div class="metric-card">'
+        + '<div class="metric-head"><span>' + escapeHtml(label) + '</span><i class="' + tone + '" data-lucide="' + icon + '"></i></div>'
+        + '<strong>' + escapeHtml(value) + '</strong>'
+        + '<small>' + escapeHtml(note || '') + '</small>'
+        + '</div>';
+    }
+
+    function field(label, control, extraClass) {
+      return '<div class="field ' + (extraClass || '') + '"><label>' + escapeHtml(label) + control + '</label></div>';
+    }
+
+    function infoItem(label, value) {
+      return '<div class="info-item"><span>' + escapeHtml(label) + '</span><strong>' + value + '</strong></div>';
+    }
+
+    function cashTable(rows, limit) {
+      var sliced = rows.slice(0, limit || rows.length);
+      if (!sliced.length) return '<div class="empty-state">Belum ada mutasi kas pada periode ini.</div>';
+      return '<div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Sumber</th><th>Anggota</th><th class="numeric">Masuk</th><th class="numeric">Keluar</th></tr></thead><tbody>'
+        + sliced.map(function (row) {
+          return '<tr><td>' + formatDate(row.tanggal) + '</td><td>' + escapeHtml(row.sumber) + '</td><td>' + escapeHtml(row.nama || '-') + '</td><td class="numeric">' + rupiah(row.masuk) + '</td><td class="numeric">' + rupiah(row.keluar) + '</td></tr>';
+        }).join('')
+        + '</tbody></table></div>';
+    }
+
+    function openModal(title, body, footer) {
+      document.getElementById('modalRoot').innerHTML =
+        '<div class="modal-backdrop"><div class="modal">'
+        + '<div class="modal-header"><h3>' + escapeHtml(title) + '</h3><button class="icon-button" onclick="closeModal()" title="Tutup"><i data-lucide="x"></i></button></div>'
+        + '<div class="modal-body">' + body + '</div>'
+        + '<div class="modal-footer">' + footer + '</div>'
+        + '</div></div>';
+      activateIcons();
+    }
+
+    function closeModal() {
+      document.getElementById('modalRoot').innerHTML = '';
+    }
+
+    function formPayload(form) {
+      var data = {};
+      new FormData(form).forEach(function (value, key) {
+        data[key] = value;
+      });
+      return data;
+    }
+
+    function memberOptions(selected) {
+      return (state.data.members || [])
+        .filter(function (member) { return member.status === 'Aktif'; })
+        .map(function (member) {
+          return '<option value="' + escapeHtml(member.idAnggota) + '" ' + (member.idAnggota === selected ? 'selected' : '') + '>'
+            + escapeHtml(member.idAnggota + ' - ' + member.nama) + '</option>';
+        }).join('');
+    }
+
+    function findMember(id) {
+      return (state.data.members || []).find(function (member) { return member.idAnggota === id; });
+    }
+
+    function findLoan(id) {
+      return (state.data.loans || []).find(function (loan) { return loan.idPinjaman === id; });
+    }
+
+    function option(value, selected, label) {
+      var isSelected = String(value) === String(selected || '');
+      return '<option value="' + escapeHtml(value) + '" ' + (isSelected ? 'selected' : '') + '>' + escapeHtml(label || value) + '</option>';
+    }
+
+    function monthOptions(selected) {
+      var months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      return months.map(function (name, index) {
+        return option(index + 1, selected, name);
+      }).join('');
+    }
+
+    function statusPill(status) {
+      var cls = status === 'Aktif' || status === 'Lunas' ? 'green' : 'red';
+      return '<span class="pill ' + cls + '">' + escapeHtml(status || '-') + '</span>';
+    }
+
+    function transactionPill(type) {
+      return '<span class="pill ' + (type === 'Setoran' ? 'blue' : 'amber') + '">' + escapeHtml(type) + '</span>';
+    }
+
+    function emptyRow(cols, text) {
+      return '<tr><td colspan="' + cols + '" class="empty-cell">' + escapeHtml(text) + '</td></tr>';
+    }
+
+    function setBusy(isBusy) {
+      state.busy = isBusy;
+      document.getElementById('loading').classList.toggle('hidden', !isBusy);
+    }
+
+    function showToast(message) {
+      var toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(function () {
+        toast.classList.remove('show');
+      }, 3600);
+    }
+
+    function activateIcons() {
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function rupiah(value) {
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0
+      }).format(Number(value || 0));
+    }
+
+    function shortRupiah(value) {
+      var number = Number(value || 0);
+      if (Math.abs(number) >= 1000000000) return 'Rp ' + Math.round(number / 1000000000) + 'M';
+      if (Math.abs(number) >= 1000000) return 'Rp ' + Math.round(number / 1000000) + 'jt';
+      if (Math.abs(number) >= 1000) return 'Rp ' + Math.round(number / 1000) + 'rb';
+      return 'Rp ' + number;
+    }
+
+    function number(value) {
+      return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(Number(value || 0));
+    }
+
+    function formatDate(value) {
+      if (!value) return '-';
+      var parts = String(value).split('-');
+      if (parts.length === 3) {
+        return parts[2] + '/' + parts[1] + '/' + parts[0];
+      }
+      return value;
+    }
+
+    function todayInput() {
+      var now = new Date();
+      var local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 10);
+    }
+
+    function valueOf(id) {
+      var el = document.getElementById(id);
+      return el ? el.value : '';
+    }
+
+    function setText(id, value) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = value;
+    }
+
+    function numberFromInput(id) {
+      return Number(valueOf(id) || 0);
+    }
+
+    function escapeHtml(value) {
+      return String(value === null || value === undefined ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function errorMessage(error) {
+      if (!error) return 'Terjadi kesalahan.';
+      if (error.message) return error.message;
+      return String(error);
+    }
+  </script>
+</body>
+</html>
